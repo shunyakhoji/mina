@@ -6,8 +6,7 @@ open Integration_test_lib
 [@@@coverage exclude_file]
 
 module Node = struct
-  type t =
-    {cluster: string; namespace: string; pod_id: string; node_graphql_port: int}
+  include Node
 
   let base_kube_args t = ["--cluster"; t.cluster; "--namespace"; t.namespace]
 

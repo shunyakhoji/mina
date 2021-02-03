@@ -81,6 +81,12 @@ module Condition = struct
     ; hard_timeout: Network_time_span.t }
 end
 
+module Node = struct
+  type t =
+    {cluster: string; namespace: string; pod_id: string; node_graphql_port: int}
+  [@@deriving to_yojson]
+end
+
 (** The signature of integration test engines. An integration test engine
  *  provides the core functionality for deploying, monitoring, and
  *  interacting with networks.
@@ -97,11 +103,7 @@ module type Engine_intf = sig
   end
 
   module Node : sig
-    type t =
-      { cluster: string
-      ; namespace: string
-      ; pod_id: string
-      ; node_graphql_port: int }
+    type t = Node.t [@@deriving to_yojson]
 
     val start : fresh_state:bool -> t -> unit Malleable_error.t
 
