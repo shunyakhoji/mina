@@ -2,13 +2,17 @@ open Core
 open Integration_test_lib
 open Currency
 
-module Make (Engine : Engine_intf) = struct
+module Make (Inputs : Intf.Test.Inputs_intf) = struct
+  open Inputs
   open Engine
+  open Dsl
 
   (* TODO: find a way to avoid this type alias (first class module signatures restrictions make this tricky) *)
   type network = Network.t
 
-  type log_engine = Log_engine.t
+  type node = Network.Node.t
+
+  type dsl = Dsl.t
 
   let config =
     let open Test_config in
@@ -62,22 +66,17 @@ module Make (Engine : Engine_intf) = struct
             let acc = G.add_vertex acc y in
             G.add_edge acc x y ) )
 
-  let run network log_engine =
+  let run network t =
     let open Network in
     let open Malleable_error.Let_syntax in
     let logger = Logger.create () in
     [%log info] "mina_peers_test: started" ;
-    let wait_for_init_partial node =
-      Log_engine.wait_for_init node log_engine
-    in
+    let peer_list = Network.block_producers network in
     let%bind () =
-      Malleable_error.List.iter network.block_producers
-        ~f:wait_for_init_partial
+      Malleable_error.List.iter peer_list ~f:(fun node ->
+          wait_for t (Wait_condition.node_to_initialize node) )
     in
     [%log info] "mina_peers_test: done waiting for initialization" ;
-    let peer_list = network.block_producers in
-    [%log info] "peers_list"
-      ~metadata:[("peers", `List (List.map peer_list ~f:Node.to_yojson))] ;
     let get_peer_id_partial = Node.get_peer_id ~logger in
     (* each element in query_results represents the data of a single node relevant to this test. ( peer_id of node * [list of peer_ids of node's peers] ) *)
     let%bind (query_results : (string * string list) list) =
