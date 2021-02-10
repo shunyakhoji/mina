@@ -407,7 +407,7 @@ module Proof = struct
   module Stable = struct
     module V1 = struct
       type t = T.t
-      [@@deriving version {asserted}, yojson, bin_io, compare, sexp]
+      [@@deriving version {asserted}, yojson, bin_io, compare, sexp, hash]
 
       let to_latest = Fn.id
     end
@@ -419,7 +419,7 @@ module Stable = struct
   module V1 = struct
     type t =
       {statement: Statement.With_sok.Stable.V1.t; proof: Proof.Stable.V1.t}
-    [@@deriving compare, fields, sexp, version, yojson]
+    [@@deriving compare, fields, sexp, version, yojson, hash]
 
     let to_latest = Fn.id
   end
