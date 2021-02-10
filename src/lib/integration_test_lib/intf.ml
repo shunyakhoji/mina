@@ -165,6 +165,7 @@ module Dsl = struct
       ; snarked_ledgers_generated: int
       ; blocks_generated: int
       ; node_initialization: bool String.Map.t
+      ; gossip_received: Gossip_state.t String.Map.t
       ; best_tips_by_node: State_hash.t String.Map.t }
 
     val listen :
@@ -221,6 +222,8 @@ module Dsl = struct
        and module Network_state := Network_state
 
     type t
+
+    val network_state : t -> Network_state.t
 
     val wait_for : t -> Wait_condition.t -> unit Malleable_error.t
 
