@@ -32,10 +32,6 @@ module Make (Inputs : Intf.Test.Inputs_intf) = struct
 
   let run network t =
     let open Malleable_error.Let_syntax in
-    Core_kernel.eprintf "NUM BLOCK PRODUCERS: %d\n%!"
-      (List.length (Network.block_producers network)) ;
-    Core_kernel.eprintf "NUM ARCHIVE NODES: %d\n%!"
-      (List.length (Network.archive_nodes network)) ;
     let logger = Logger.create () in
     let block_producers = Network.block_producers network in
     [%log info] "archive node test: waiting for block producers to initialize" ;

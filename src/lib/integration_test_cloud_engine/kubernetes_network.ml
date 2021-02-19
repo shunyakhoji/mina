@@ -400,7 +400,7 @@ let archive_nodes {archive_nodes; _} = archive_nodes
 
 let keypairs {keypairs; _} = keypairs
 
-let all_nodes {block_producers; snark_coordinators; _} =
-  block_producers @ snark_coordinators
+let all_nodes {block_producers; snark_coordinators; archive_nodes; _} =
+  block_producers @ snark_coordinators @ archive_nodes
 
 let lookup_node_by_app_id t = Map.find t.nodes_by_app_id

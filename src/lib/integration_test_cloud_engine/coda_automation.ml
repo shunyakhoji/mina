@@ -299,6 +299,7 @@ module Network_manager = struct
     ; constants: Test_config.constants
     ; block_producer_nodes: Kubernetes_network.Node.t list
     ; snark_coordinator_nodes: Kubernetes_network.Node.t list
+    ; archive_nodes: Kubernetes_network.Node.t list
     ; nodes_by_app_id: Kubernetes_network.Node.t String.Map.t
     ; mutable deployed: bool
     ; keypairs: Keypair.t list }
@@ -366,14 +367,23 @@ module Network_manager = struct
     in
     (* we currently only deploy 1 coordinator per deploy (will be configurable later) *)
     let snark_coordinator_nodes = [cons_node "snark-coordinator-1" 3085] in
+    let num_block_producers =
+      List.length network_config.terraform.block_producer_configs
+    in
     let block_producer_nodes =
-      List.init (List.length network_config.terraform.block_producer_configs)
-        ~f:(fun i ->
-          cons_node (Printf.sprintf "test-block-producer-%d" (i + 1)) (i + 3086)
-      )
+      List.init num_block_producers ~f:(fun i ->
+          cons_node (sprintf "test-block-producer-%d" (i + 1)) (i + 3086) )
+    in
+    let archive_nodes =
+      List.init network_config.terraform.archive_node_count ~f:(fun i ->
+          cons_node
+            (sprintf "archive-node-%d" (i + 1))
+            (i + 3086 + num_block_producers) )
     in
     let nodes_by_app_id =
-      let all_nodes = snark_coordinator_nodes @ block_producer_nodes in
+      let all_nodes =
+        snark_coordinator_nodes @ block_producer_nodes @ archive_nodes
+      in
       all_nodes
       |> List.map ~f:(fun node -> (node.pod_id, node))
       |> String.Map.of_alist_exn
@@ -387,6 +397,7 @@ module Network_manager = struct
       ; constants= network_config.constants
       ; block_producer_nodes
       ; snark_coordinator_nodes
+      ; archive_nodes
       ; nodes_by_app_id
       ; deployed= false
       ; keypairs=
@@ -407,7 +418,7 @@ module Network_manager = struct
       ; constants= t.constants
       ; block_producers= t.block_producer_nodes
       ; snark_coordinators= t.snark_coordinator_nodes
-      ; archive_nodes= []
+      ; archive_nodes= t.archive_nodes
       ; nodes_by_app_id= t.nodes_by_app_id
       ; testnet_log_filter= t.testnet_log_filter
       ; keypairs= t.keypairs }
