@@ -196,7 +196,9 @@ module Network_config = struct
             ; slots_per_sub_window= Some slots_per_sub_window
             ; genesis_state_timestamp=
                 Some Core.Time.(to_string_abs ~zone:Zone.utc (now ())) }
-      ; proof= Some proof_config (* TODO: prebake ledger and only set hash *)
+      ; proof=
+          None
+          (* was: Some proof_config; TODO: prebake ledger and only set hash *)
       ; ledger=
           Some
             { base= Accounts runtime_accounts
